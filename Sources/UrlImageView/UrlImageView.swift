@@ -21,7 +21,7 @@ public struct UrlImageView: View {
         self.placeHolderColor = placeHolderColor
     }
 
-    var body: some View {
+    public var body: some View {
         image
             .resizable()
             .renderingMode(.original)
@@ -29,7 +29,7 @@ public struct UrlImageView: View {
             .foregroundColor(placeHolderColor)
     }
 
-    var image: Image {
+    public var image: Image {
         if let urlImage = urlImageModel.image {
             return Image(uiImage: urlImage)
         }
@@ -39,10 +39,11 @@ public struct UrlImageView: View {
     static private var defaultImage = Image(systemName: "photo")
 }
 
+#if DEBUG
+let debugURL = URL(string: "https://cdn.vox-cdn.com/thumbor/lcFItKgWrkvfGouCKrYRtZU-sIQ=/0x0:3360x2240/1200x800/filters:focal(1412x852:1948x1388)/cdn.vox-cdn.com/uploads/chorus_image/image/55017319/REC_ASA_CODE17-20170530-164855-0159.0.0.jpg")
 struct UrlImageView_Previews: PreviewProvider {
     static var previews: some View {
-        UrlImageView(imageUrl: URL(string: "https://cdn.vox-cdn.com/thumbor/lcFItKgWrkvfGouCKrYRtZU-sIQ=/0x0:3360x2240/1200x800/filters:focal(1412x852:1948x1388)/cdn.vox-cdn.com/uploads/chorus_image/image/55017319/REC_ASA_CODE17-20170530-164855-0159.0.0.jpg"),
-                     imageSize: CGSize(width: 30, height: 30),
-                     placeHolderColor: .black)
+        UrlImageView(imageUrl: debugURL, imageSize: CGSize(width: 30, height: 30), placeHolderColor: .black)
     }
 }
+#endif

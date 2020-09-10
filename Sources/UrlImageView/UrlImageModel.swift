@@ -7,6 +7,7 @@
 
 import SwiftUI
 import Combine
+import KamaalNetworker
 
 final public class UrlImageModel: ObservableObject {
 
@@ -17,10 +18,10 @@ final public class UrlImageModel: ObservableObject {
     private var imageCache = ImageCache.getImageCache()
 
     private var kowalskiAnalysis: Bool
-    private let networker: Networkable?
+    private let networker: KamaalNetworkable?
 
     internal init(imageUrl: URL?,
-         networker: Networkable = Networker(),
+         networker: KamaalNetworkable = KamaalNetworker(),
          kowalskiAnalysis: Bool = false) {
         self.kowalskiAnalysis = kowalskiAnalysis
         self.networker = networker
@@ -34,7 +35,7 @@ final public class UrlImageModel: ObservableObject {
 
     public init(imageUrl: URL?) {
         self.kowalskiAnalysis = false
-        self.networker = Networker()
+        self.networker = KamaalNetworker()
         self.imageUrl = imageUrl
         self.analyse("\(imageUrl?.absoluteString ?? "") loaded from NSCache")
         let loaded = loadImageFromCache()
