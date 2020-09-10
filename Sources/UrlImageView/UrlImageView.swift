@@ -21,7 +21,7 @@ public struct UrlImageView: View {
         self.placeHolderColor = placeHolderColor
     }
 
-    var body: some View {
+    public var body: some View {
         image
             .resizable()
             .renderingMode(.original)
@@ -29,7 +29,7 @@ public struct UrlImageView: View {
             .foregroundColor(placeHolderColor)
     }
 
-    var image: Image {
+    public var image: Image {
         if let urlImage = urlImageModel.image {
             return Image(uiImage: urlImage)
         }
