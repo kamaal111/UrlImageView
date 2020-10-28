@@ -15,7 +15,7 @@ public struct UrlImageView: View {
 
     private var placeHolderColor: Color
 
-    public init(imageUrl: URL?, imageSize: CGSize, placeHolderColor: Color) {
+    public init(imageUrl: URL?, imageSize: CGSize, placeHolderColor: Color = Color(.systemBackground)) {
         self.urlImageModel = UrlImageModel(imageUrl: imageUrl)
         self.imageSize = imageSize
         self.placeHolderColor = placeHolderColor
@@ -28,7 +28,6 @@ public struct UrlImageView: View {
                     .resizable()
                     .renderingMode(.original)
                     .frame(width: imageSize.width, height: imageSize.height)
-                    .foregroundColor(placeHolderColor)
             }
         }
         .frame(width: imageSize.width, height: imageSize.height)
