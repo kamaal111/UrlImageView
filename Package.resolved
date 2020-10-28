@@ -2,12 +2,12 @@
   "object": {
     "pins": [
       {
-        "package": "KamaalNetworker",
-        "repositoryURL": "https://github.com/kamaal111/KamaalNetworker",
+        "package": "XiphiasNet",
+        "repositoryURL": "https://github.com/kamaal111/XiphiasNet",
         "state": {
           "branch": null,
-          "revision": "4e143a9fbae31728c20517586ad52520140d92e6",
-          "version": "1.0.1"
+          "revision": "b7d03948b7d7757612ce0338d386718465b0f2ab",
+          "version": "3.0.0"
         }
       }
     ]
