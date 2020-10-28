@@ -7,7 +7,7 @@
 
 import SwiftUI
 import Combine
-import KamaalNetworker
+import XiphiasNet
 
 final public class UrlImageModel: ObservableObject {
 
@@ -18,10 +18,10 @@ final public class UrlImageModel: ObservableObject {
     private var imageCache = ImageCache.getImageCache()
 
     private var kowalskiAnalysis: Bool
-    private let networker: KamaalNetworkable?
+    private let networker: XiphiasNetable?
 
     internal init(imageUrl: URL?,
-         networker: KamaalNetworkable = KamaalNetworker(),
+         networker: XiphiasNetable = XiphiasNet(),
          kowalskiAnalysis: Bool = false) {
         self.kowalskiAnalysis = kowalskiAnalysis
         self.networker = networker
@@ -35,7 +35,7 @@ final public class UrlImageModel: ObservableObject {
 
     public init(imageUrl: URL?) {
         self.kowalskiAnalysis = false
-        self.networker = KamaalNetworker()
+        self.networker = XiphiasNet()
         self.imageUrl = imageUrl
         self.analyse("\(imageUrl?.absoluteString ?? "") loaded from NSCache")
         let loaded = loadImageFromCache()
@@ -57,14 +57,14 @@ private extension UrlImageModel {
     }
 
     func loadImage() {
-        guard let urlString = imageUrl?.absoluteString else { return }
+        guard let imageUrl = imageUrl else { return }
         DispatchQueue.global().async {
-            self.networker?.loadImage(from: urlString) { [weak self] result in
+            self.networker?.loadImage(from: imageUrl) { [weak self] result in
                 switch result {
                 case .failure(let failure):
-                    self?.analyse("*** Failed to load image of \(urlString) -> \(failure)")
+                    self?.analyse("*** Failed to load image of \(imageUrl.absoluteString) -> \(failure)")
                 case .success(let imageData):
-                    self?.saveAndSetCachedImage(imageData: imageData, urlString: urlString)
+                    self?.saveAndSetCachedImage(imageData: imageData, urlString: imageUrl.absoluteString)
                 }
             }
         }
