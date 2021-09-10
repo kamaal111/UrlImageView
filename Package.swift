@@ -12,7 +12,7 @@ let package = Package(
         .library(name: "UrlImageView", targets: ["UrlImageView"]),
     ],
     dependencies: [
-         .package(url: "https://github.com/kamaal111/XiphiasNet", from: "3.0.0")
+        .package(url: "https://github.com/kamaal111/XiphiasNet", "6.0.0"..<"7.0.0")
     ],
     targets: [
         .target(
