@@ -27,14 +27,8 @@ final public class UrlImageModel: ObservableObject {
         }
     }
 
-    public init(imageUrl: URL?) {
-        self.kowalskiAnalysis = false
-        self.imageUrl = imageUrl
-        self.analyse("\(imageUrl?.absoluteString ?? "") loaded from NSCache")
-        let loaded = loadImageFromCache()
-        if !loaded {
-            loadImage()
-        }
+    public convenience init(imageUrl: URL?) {
+        self.init(imageUrl: imageUrl, kowalskiAnalysis: false)
     }
 
 }

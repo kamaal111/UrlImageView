@@ -25,6 +25,7 @@ public struct UrlImageView: View {
         ZStack {
             if urlImageModel.image != nil {
                 image
+                    .foregroundColor(.red)
                     .resizable()
                     .renderingMode(.original)
                     .frame(width: imageSize.width, height: imageSize.height)
