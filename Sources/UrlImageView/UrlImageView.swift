@@ -12,32 +12,55 @@ public struct UrlImageView: View {
     private var urlImageModel: UrlImageModel
 
     public let imageSize: CGSize
-
-    private var placeHolderColor: Color
+    public let imageColor: Color?
+    private let placeHolderColor: Color
 
     public init(imageUrl: URL?, imageSize: CGSize, placeHolderColor: Color = Color(.systemBackground)) {
         self.urlImageModel = UrlImageModel(imageUrl: imageUrl)
         self.imageSize = imageSize
         self.placeHolderColor = placeHolderColor
+        self.imageColor = nil
+    }
+
+    public init(imageUrl: URL?, imageSize: CGSize, imageColor: Color) {
+        self.urlImageModel = UrlImageModel(imageUrl: imageUrl)
+        self.imageSize = imageSize
+        self.placeHolderColor = imageColor
+        self.imageColor = imageColor
     }
 
     public var body: some View {
         ZStack {
-            if urlImageModel.image != nil {
-                image
-                    .resizable()
-                    .renderingMode(.original)
-                    .frame(width: imageSize.width, height: imageSize.height)
+            if let imageColor = self.imageColor {
+                imageWithImageColor(imageColor: imageColor)
+            } else {
+                if let urlImage = urlImageModel.image {
+                    Image(uiImage: urlImage)
+                        .resizable()
+                        .frame(width: imageSize.width, height: imageSize.height)
+                } else {
+                    UrlImageView.defaultImage
+                        .resizable()
+                        .frame(width: imageSize.width, height: imageSize.height)
+                        .foregroundColor(placeHolderColor)
+                }
             }
         }
         .frame(width: imageSize.width, height: imageSize.height)
     }
 
-    public var image: Image {
+    private func imageWithImageColor(imageColor: Color) -> some View {
+        let imageToReturn: Image
         if let urlImage = urlImageModel.image {
-            return Image(uiImage: urlImage)
+            imageToReturn =  Image(uiImage: urlImage)
+        } else {
+            imageToReturn = UrlImageView.defaultImage
         }
-        return UrlImageView.defaultImage
+        return imageToReturn
+            .resizable()
+            .renderingMode(.template)
+            .frame(width: imageSize.width, height: imageSize.height)
+            .foregroundColor(imageColor)
     }
 
     static private var defaultImage = Image(systemName: "photo")
@@ -48,7 +71,7 @@ let debugURL = URL(string: "https://cdn.vox-cdn.com/thumbor/lcFItKgWrkvfGouCKrYR
 struct UrlImageView_Previews: PreviewProvider {
     static var previews: some View {
         VStack {
-            UrlImageView(imageUrl: debugURL, imageSize: CGSize(width: 30, height: 30), placeHolderColor: .black)
+            UrlImageView(imageUrl: debugURL, imageSize: CGSize(width: 30, height: 30), imageColor: .red)
             UrlImageView(imageUrl: debugURL, imageSize: CGSize(width: 30, height: 30), placeHolderColor: .black)
             UrlImageView(imageUrl: debugURL, imageSize: CGSize(width: 30, height: 30), placeHolderColor: .black)
         }
