@@ -37,9 +37,11 @@ public struct UrlImageView: View {
                 if let urlImage = urlImageModel.image {
                     Image(uiImage: urlImage)
                         .resizable()
+                        .frame(width: imageSize.width, height: imageSize.height)
                 } else {
                     UrlImageView.defaultImage
                         .resizable()
+                        .frame(width: imageSize.width, height: imageSize.height)
                         .foregroundColor(placeHolderColor)
                 }
             }
@@ -57,6 +59,7 @@ public struct UrlImageView: View {
         return imageToReturn
             .resizable()
             .renderingMode(.template)
+            .frame(width: imageSize.width, height: imageSize.height)
             .foregroundColor(imageColor)
     }
 
