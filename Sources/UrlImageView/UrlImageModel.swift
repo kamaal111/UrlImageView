@@ -16,6 +16,7 @@ final public class UrlImageModel: ObservableObject {
     private var imageUrl: URL?
     private var imageCache = ImageCache.getImageCache()
     private var kowalskiAnalysis: Bool
+    private let networker = XiphiasNet()
 
     internal init(imageUrl: URL?, kowalskiAnalysis: Bool = false) {
         self.kowalskiAnalysis = kowalskiAnalysis
@@ -27,14 +28,8 @@ final public class UrlImageModel: ObservableObject {
         }
     }
 
-    public init(imageUrl: URL?) {
-        self.kowalskiAnalysis = false
-        self.imageUrl = imageUrl
-        self.analyse("\(imageUrl?.absoluteString ?? "") loaded from NSCache")
-        let loaded = loadImageFromCache()
-        if !loaded {
-            loadImage()
-        }
+    public convenience init(imageUrl: URL?) {
+        self.init(imageUrl: imageUrl, kowalskiAnalysis: false)
     }
 
 }
@@ -53,7 +48,7 @@ private extension UrlImageModel {
         guard let imageUrl = imageUrl else { return }
         DispatchQueue.global().async { [weak self] in
             guard let self = self else { return }
-            let imageDataResult = XiphiasNet.loadImage(from: imageUrl)
+            let imageDataResult = self.networker.loadImage(from: imageUrl)
             switch imageDataResult {
             case .failure(let failure):
                 self.analyse("*** Failed to load image of \(imageUrl.absoluteString) -> \(failure)")
