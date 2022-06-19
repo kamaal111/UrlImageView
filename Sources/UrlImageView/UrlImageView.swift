@@ -13,7 +13,14 @@ public struct UrlImageView: View {
 
     public let imageSize: CGSize
     public let imageColor: Color?
-    private let placeHolderColor: Color
+    private let placeHolderColor: Color?
+
+    public init(imageUrl: URL?, imageSize: CGSize, placeHolderColor: Color? = nil) {
+        self.urlImageModel = UrlImageModel(imageUrl: imageUrl)
+        self.imageSize = imageSize
+        self.placeHolderColor = placeHolderColor
+        self.imageColor = nil
+    }
 
     public init(imageUrl: URL?, imageSize: CGSize, imageColor: Color) {
         self.urlImageModel = UrlImageModel(imageUrl: imageUrl)
@@ -32,10 +39,12 @@ public struct UrlImageView: View {
                         .resizable()
                         .frame(width: imageSize.width, height: imageSize.height)
                 } else {
-                    UrlImageView.defaultImage
-                        .resizable()
-                        .frame(width: imageSize.width, height: imageSize.height)
-                        .foregroundColor(placeHolderColor)
+                    if let placeHolderColor = placeHolderColor {
+                        UrlImageView.defaultImage
+                            .resizable()
+                            .frame(width: imageSize.width, height: imageSize.height)
+                            .foregroundColor(placeHolderColor)
+                    }
                 }
             }
         }
