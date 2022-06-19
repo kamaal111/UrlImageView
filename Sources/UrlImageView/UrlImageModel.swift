@@ -9,63 +9,84 @@ import SwiftUI
 import Combine
 import XiphiasNet
 
-final public class UrlImageModel: ObservableObject {
+final class UrlImageModel: ObservableObject {
 
-    @Published public var image: UIImage?
+    #if canImport(UIKit)
+    @Published var image: UIImage?
+    #else
+    @Published var image: NSImage?
+    #endif
 
     private var imageUrl: URL?
     private var imageCache = ImageCache.getImageCache()
     private var kowalskiAnalysis: Bool
     private let networker = XiphiasNet()
 
-    internal init(imageUrl: URL?, kowalskiAnalysis: Bool = false) {
+    init(imageUrl: URL?, kowalskiAnalysis: Bool = false) {
         self.kowalskiAnalysis = kowalskiAnalysis
         self.imageUrl = imageUrl
         self.analyse("\(imageUrl?.absoluteString ?? "") loaded from NSCache")
-        let loaded = loadImageFromCache()
-        if !loaded {
-            loadImage()
+
+        Task {
+            let loaded = await loadImageFromCache()
+            if !loaded {
+                await loadImage()
+            }
         }
     }
 
-    public convenience init(imageUrl: URL?) {
+    convenience init(imageUrl: URL?) {
         self.init(imageUrl: imageUrl, kowalskiAnalysis: false)
     }
 
 }
 
 private extension UrlImageModel {
-    func loadImageFromCache() -> Bool {
+    func loadImageFromCache() async -> Bool {
         guard let urlString = imageUrl?.absoluteString,
-            let cacheImage = imageCache.get(forKey: urlString) else {
+            let cacheImage = await imageCache.get(forKey: urlString) else {
                 return false
         }
-        image = cacheImage
+        await setImage(cacheImage)
         return true
     }
 
-    func loadImage() {
+    func loadImage() async {
         guard let imageUrl = imageUrl else { return }
-        DispatchQueue.global().async { [weak self] in
-            guard let self = self else { return }
-            let imageDataResult = self.networker.loadImage(from: imageUrl)
-            switch imageDataResult {
-            case .failure(let failure):
-                self.analyse("*** Failed to load image of \(imageUrl.absoluteString) -> \(failure)")
-            case .success(let success):
-                self.saveAndSetCachedImage(imageData: success, urlString: imageUrl.absoluteString)
-            }
+
+        let imageDataResult = self.networker.loadImage(from: imageUrl)
+        switch imageDataResult {
+        case .failure(let failure):
+            analyse("*** Failed to load image of \(imageUrl.absoluteString) -> \(failure)")
+        case .success(let success):
+            await saveAndSetCachedImage(imageData: success, urlString: imageUrl.absoluteString)
         }
     }
 
-    func saveAndSetCachedImage(imageData: Data, urlString: String) {
+    func saveAndSetCachedImage(imageData: Data, urlString: String) async {
+        #if canImport(UIKit)
         guard let image = UIImage(data: imageData) else { return }
-        DispatchQueue.main.async { [weak self] in
-            guard let self = self else { return }
-            self.imageCache.set(forKey: urlString, image: image)
-            self.image = image
-        }
+        #else
+        guard let image = NSImage(data: imageData) else { return }
+        #endif
+
+        async let cacheCompletion: () = imageCache.set(forKey: urlString, object: image)
+        async let setImageCompletion: () = setImage(image)
+
+        _ = await [cacheCompletion, setImageCompletion]
     }
+
+    #if canImport(UIKit)
+    @MainActor
+    func setImage(_ image: UIImage) {
+        self.image = image
+    }
+    #else
+    @MainActor
+    func setImage(_ image: NSImage) {
+        self.image = image
+    }
+    #endif
 
     func analyse(_ message: String) {
         if kowalskiAnalysis {
