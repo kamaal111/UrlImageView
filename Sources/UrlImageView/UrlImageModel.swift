@@ -9,12 +9,12 @@ import SwiftUI
 import Combine
 import XiphiasNet
 
-final public class UrlImageModel: ObservableObject {
+final class UrlImageModel: ObservableObject {
 
     #if canImport(UIKit)
-    @Published public var image: UIImage?
+    @Published var image: UIImage?
     #else
-    @Published public var image: NSImage?
+    @Published var image: NSImage?
     #endif
 
     private var imageUrl: URL?
@@ -22,7 +22,7 @@ final public class UrlImageModel: ObservableObject {
     private var kowalskiAnalysis: Bool
     private let networker = XiphiasNet()
 
-    internal init(imageUrl: URL?, kowalskiAnalysis: Bool = false) {
+    init(imageUrl: URL?, kowalskiAnalysis: Bool = false) {
         self.kowalskiAnalysis = kowalskiAnalysis
         self.imageUrl = imageUrl
         self.analyse("\(imageUrl?.absoluteString ?? "") loaded from NSCache")
@@ -32,7 +32,7 @@ final public class UrlImageModel: ObservableObject {
         }
     }
 
-    public convenience init(imageUrl: URL?) {
+    convenience init(imageUrl: URL?) {
         self.init(imageUrl: imageUrl, kowalskiAnalysis: false)
     }
 
