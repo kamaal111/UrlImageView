@@ -11,7 +11,11 @@ import XiphiasNet
 
 final public class UrlImageModel: ObservableObject {
 
+    #if canImport(UIKit)
     @Published public var image: UIImage?
+    #else
+    @Published public var image: NSImage?
+    #endif
 
     private var imageUrl: URL?
     private var imageCache = ImageCache.getImageCache()
@@ -59,10 +63,14 @@ private extension UrlImageModel {
     }
 
     func saveAndSetCachedImage(imageData: Data, urlString: String) {
+        #if canImport(UIKit)
         guard let image = UIImage(data: imageData) else { return }
+        #else
+        guard let image = NSImage(data: imageData) else { return }
+        #endif
         DispatchQueue.main.async { [weak self] in
             guard let self = self else { return }
-            self.imageCache.set(forKey: urlString, image: image)
+            self.imageCache.set(forKey: urlString, object: image)
             self.image = image
         }
     }
