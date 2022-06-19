@@ -44,7 +44,7 @@ final class UrlImageModel: ObservableObject {
 private extension UrlImageModel {
     func loadImageFromCache() async -> Bool {
         guard let urlString = imageUrl?.absoluteString,
-            let cacheImage = imageCache.get(forKey: urlString) else {
+            let cacheImage = await imageCache.get(forKey: urlString) else {
                 return false
         }
         await setImage(cacheImage)
@@ -70,8 +70,10 @@ private extension UrlImageModel {
         guard let image = NSImage(data: imageData) else { return }
         #endif
 
-        self.imageCache.set(forKey: urlString, object: image)
-        await setImage(image)
+        async let cacheCompletion: () = imageCache.set(forKey: urlString, object: image)
+        async let setImageCompletion: () = setImage(image)
+
+        _ = await [cacheCompletion, setImageCompletion]
     }
 
     #if canImport(UIKit)

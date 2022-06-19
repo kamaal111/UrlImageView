@@ -7,7 +7,7 @@
 
 import SwiftUI
 
-class ImageCache {
+actor ImageCache {
     private var cache = NSCache<NSString, AnyObject>()
 
     private static var imageCache = ImageCache()
