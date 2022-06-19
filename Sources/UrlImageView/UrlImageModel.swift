@@ -26,9 +26,12 @@ final class UrlImageModel: ObservableObject {
         self.kowalskiAnalysis = kowalskiAnalysis
         self.imageUrl = imageUrl
         self.analyse("\(imageUrl?.absoluteString ?? "") loaded from NSCache")
-        let loaded = loadImageFromCache()
-        if !loaded {
-            loadImage()
+
+        Task {
+            let loaded = await loadImageFromCache()
+            if !loaded {
+                await loadImage()
+            }
         }
     }
 
@@ -39,41 +42,49 @@ final class UrlImageModel: ObservableObject {
 }
 
 private extension UrlImageModel {
-    func loadImageFromCache() -> Bool {
+    func loadImageFromCache() async -> Bool {
         guard let urlString = imageUrl?.absoluteString,
             let cacheImage = imageCache.get(forKey: urlString) else {
                 return false
         }
-        image = cacheImage
+        await setImage(cacheImage)
         return true
     }
 
-    func loadImage() {
+    func loadImage() async {
         guard let imageUrl = imageUrl else { return }
-        DispatchQueue.global().async { [weak self] in
-            guard let self = self else { return }
-            let imageDataResult = self.networker.loadImage(from: imageUrl)
-            switch imageDataResult {
-            case .failure(let failure):
-                self.analyse("*** Failed to load image of \(imageUrl.absoluteString) -> \(failure)")
-            case .success(let success):
-                self.saveAndSetCachedImage(imageData: success, urlString: imageUrl.absoluteString)
-            }
+
+        let imageDataResult = self.networker.loadImage(from: imageUrl)
+        switch imageDataResult {
+        case .failure(let failure):
+            analyse("*** Failed to load image of \(imageUrl.absoluteString) -> \(failure)")
+        case .success(let success):
+            await saveAndSetCachedImage(imageData: success, urlString: imageUrl.absoluteString)
         }
     }
 
-    func saveAndSetCachedImage(imageData: Data, urlString: String) {
+    func saveAndSetCachedImage(imageData: Data, urlString: String) async {
         #if canImport(UIKit)
         guard let image = UIImage(data: imageData) else { return }
         #else
         guard let image = NSImage(data: imageData) else { return }
         #endif
-        DispatchQueue.main.async { [weak self] in
-            guard let self = self else { return }
-            self.imageCache.set(forKey: urlString, object: image)
-            self.image = image
-        }
+
+        self.imageCache.set(forKey: urlString, object: image)
+        await setImage(image)
     }
+
+    #if canImport(UIKit)
+    @MainActor
+    func setImage(_ image: UIImage) {
+        self.image = image
+    }
+    #else
+    @MainActor
+    func setImage(_ image: NSImage) {
+        self.image = image
+    }
+    #endif
 
     func analyse(_ message: String) {
         if kowalskiAnalysis {
