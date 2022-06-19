@@ -13,9 +13,9 @@ public struct UrlImageView: View {
 
     public let imageSize: CGSize
     public let imageColor: Color?
-    private let placeHolderColor: Color
+    private let placeHolderColor: Color?
 
-    public init(imageUrl: URL?, imageSize: CGSize, placeHolderColor: Color = Color(.systemBackground)) {
+    public init(imageUrl: URL?, imageSize: CGSize, placeHolderColor: Color? = nil) {
         self.urlImageModel = UrlImageModel(imageUrl: imageUrl)
         self.imageSize = imageSize
         self.placeHolderColor = placeHolderColor
@@ -35,14 +35,16 @@ public struct UrlImageView: View {
                 imageWithImageColor(imageColor: imageColor)
             } else {
                 if let urlImage = urlImageModel.image {
-                    Image(uiImage: urlImage)
+                    Image(universal: urlImage)
                         .resizable()
                         .frame(width: imageSize.width, height: imageSize.height)
                 } else {
-                    UrlImageView.defaultImage
-                        .resizable()
-                        .frame(width: imageSize.width, height: imageSize.height)
-                        .foregroundColor(placeHolderColor)
+                    if let placeHolderColor = placeHolderColor {
+                        UrlImageView.defaultImage
+                            .resizable()
+                            .frame(width: imageSize.width, height: imageSize.height)
+                            .foregroundColor(placeHolderColor)
+                    }
                 }
             }
         }
@@ -52,7 +54,7 @@ public struct UrlImageView: View {
     private func imageWithImageColor(imageColor: Color) -> some View {
         let imageToReturn: Image
         if let urlImage = urlImageModel.image {
-            imageToReturn =  Image(uiImage: urlImage)
+            imageToReturn = Image(universal: urlImage)
         } else {
             imageToReturn = UrlImageView.defaultImage
         }
@@ -66,14 +68,24 @@ public struct UrlImageView: View {
     static private var defaultImage = Image(systemName: "photo")
 }
 
+extension Image {
+    #if canImport(UIKit)
+    init(universal image: UIImage) {
+        self.init(uiImage: image)
+    }
+    #else
+    init(universal image: NSImage) {
+        self.init(nsImage: image)
+    }
+    #endif
+}
+
 #if DEBUG
 let debugURL = URL(string: "https://cdn.vox-cdn.com/thumbor/lcFItKgWrkvfGouCKrYRtZU-sIQ=/0x0:3360x2240/1200x800/filters:focal(1412x852:1948x1388)/cdn.vox-cdn.com/uploads/chorus_image/image/55017319/REC_ASA_CODE17-20170530-164855-0159.0.0.jpg")
 struct UrlImageView_Previews: PreviewProvider {
     static var previews: some View {
         VStack {
             UrlImageView(imageUrl: debugURL, imageSize: CGSize(width: 30, height: 30), imageColor: .red)
-            UrlImageView(imageUrl: debugURL, imageSize: CGSize(width: 30, height: 30), placeHolderColor: .black)
-            UrlImageView(imageUrl: debugURL, imageSize: CGSize(width: 30, height: 30), placeHolderColor: .black)
         }
     }
 }
